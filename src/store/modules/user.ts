@@ -1,9 +1,10 @@
 //创建用户相关的小仓库
 import { defineStore, type Store } from 'pinia'
 //引入接口
-import { reqLogin, reqUserInfo } from '@/api/user'
+import { reqLogin, reqUserInfo, reqLogout } from '@/api/user'
 //引入数据类型
-import type { loginForm,loginResponseData } from '@/api/user/type'
+// import type { loginForm,loginResponseData } from '@/api/user/type'
+import type { loginFormData, loginResponseData, userInfoResponseData } from '@/api/user/type'
 import type { UserState } from '@/store/modules/types/type'
 //引入操作本地存储的工具方法
 import { GET_TOKEN, SET_TOKEN, REMOVE_TOKEN } from '@/utils/token'
@@ -24,42 +25,55 @@ let useUserStore = defineStore('user', {
   //异步|逻辑的地方
   actions: {
     //用户登录的方法
-    async userLogin(data: loginForm) {
+    async userLogin(data: loginFormData) {
       //登录请求
       let result:loginResponseData = await reqLogin(data);
+      console.log(result);
       //登录成功：200->token
       //登录失败：201->登录失败错误的信息
       if (result.code == 200) {
         //pinia仓库存储一下token
         //由于pinia|vues存储数据其实利用js对象
-        this.token = (result.data.token as string);//保证token在一定是字符串的情况下赋值
+        this.token = (result.data as string);//保证token在一定是字符串的情况下赋值
         //本地存储持久化数据一份
-        SET_TOKEN((result.data.token as string));
+        SET_TOKEN((result.data as string));
         //能保证当前async函数返回一个成功的promise
         return 'ok';
       }else {
-        return Promise.reject(new Error(result.data.message));
+        return Promise.reject(new Error(result.data));
       }
     },
     //获取用户信息的方法
     async userInfo() {
       //获取用户信息存储到仓库当中[用户头像、名字]
-      let result = await reqUserInfo();
+      let result: userInfoResponseData = await reqUserInfo();
+      console.log(result);
       //如果成功获取用户信息，存储一下用户信息
       if (result.code == 200) {
-        this.username = result.data.checkUser.username;
-        this.avatar = result.data.checkUser.avatar;
+        this.username = result.data.name;
+        this.avatar = result.data.avatar;
+        return 'ok';
       }else {
-        alert("获取用户信息失败")
+        return Promise.reject(new Error(result.message));
       }
     },
     //退出登录
-    userLogout(){
-      //目前没有mock接口：退出登录接口(通知服务器本地用户唯一标识失效)
-      this.token = '';
-      this.username = '';
-      this.avatar = '';
-      REMOVE_TOKEN();
+    async userLogout(){
+      let result:any = await reqLogout();
+      console.log(result);
+      //判断
+      if (result.code == 200) {
+        //目前没有mock接口：退出登录接口(通知服务器本地用户唯一标识失效)
+        this.token = '';
+        this.username = '';
+        this.avatar = '';
+        REMOVE_TOKEN();
+        //留给组件作为判断退出登录是否成功的依据
+        return 'ok';
+      } else {
+        return Promise.reject(new Error(result.message));
+      }
+
     }
   },
   getters: {
