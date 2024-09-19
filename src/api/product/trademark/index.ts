@@ -11,7 +11,7 @@ enum API {
   //添加品牌
   ADDTRADEMARK_URL= "/admin/product/baseTrademark/save",
   //修改已有品牌
-  UPDATETRADEMARK_URL= "/admin/product/baseTrademark/save",
+  UPDATETRADEMARK_URL= "/admin/product/baseTrademark/update",
 
 }
 //获取已有品牌接口的方法
@@ -25,7 +25,7 @@ export const reqAddOrUpdateTrademark = (data:TradeMark) => {
     //该接口没有返回参数，直接定义为any
     return request.put<any,any>(API.UPDATETRADEMARK_URL,data);
   } else {
-  //没有id，新增品牌
+    //没有id，新增品牌
     return request.post<any,any>(API.ADDTRADEMARK_URL,data);
   }
 }

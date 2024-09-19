@@ -20,7 +20,7 @@
         </el-table-column>
         <el-table-column label="操作">
           <template #="{row,$index}">
-            <el-button type="primary" size="default" icon="Edit" @click="updateTrademark"></el-button>
+            <el-button type="primary" size="default" icon="Edit" @click="$event =>updateTrademark(row)"></el-button>
             <el-button type="danger" size="default" icon="Delete"></el-button>
           </template>
         </el-table-column>
@@ -35,7 +35,6 @@
       <el-pagination
         @current-change="getHasTrademark"
         @size-change="sizeChange"
-        :page-count="5"
         v-model:current-page="pageNo"
         v-model:page-size="limit"
         :page-sizes="[3, 5, 7, 9]"
@@ -47,12 +46,12 @@
 <!--    对话框组件：在添加品牌与修改已有品牌的业务时候使用结构-->
 <!--    v-model:属性用户控制对话框的显示与隐藏  -->
 <!--    title:设置对话框左上角标题  -->
-    <el-dialog v-model="dialogFormVisible" title="添加品牌">
-      <el-form style="width: 80%">
-        <el-form-item label="品牌名称" label-width="80px" label-position="left">
+    <el-dialog v-model="dialogFormVisible" :title="trademarkParams.id?'修改品牌':'添加品牌'">
+      <el-form style="width: 80%" :model="trademarkParams" :rules="rules">
+        <el-form-item label="品牌名称" label-width="90px" label-position="left" prop="tmName">
           <el-input placeholder="请您输入品牌名称" v-model="trademarkParams.tmName"></el-input>
         </el-form-item>
-        <el-form-item label="品牌Logo" label-width="80px" label-position="left">
+        <el-form-item label="品牌Logo" label-width="90px" label-position="left" prop="logoUrl">
 <!--       el-upload:action属性：图片上传路径   -->
 <!--       el-upload::show-file-list属性：是否显示上传图片列表   -->
           <el-upload
@@ -80,8 +79,9 @@
 import { ElMessage, type UploadProps } from 'element-plus'
 
 import { ref, onMounted, reactive } from 'vue'
-import { reqHasTrademark } from '@/api/product/trademark'
+import { reqHasTrademark, reqAddOrUpdateTrademark } from '@/api/product/trademark'
 import type { Records, TradeMark, TradeMarkResponseData } from '@/api/product/trademark/type'
+import { requiredNumber } from 'element-plus/es/components/table-v2/src/common.mjs';
 //当前页面
 let pageNo = ref<number>(1);
 //每一页展示多少条数据
@@ -129,19 +129,55 @@ const sizeChange = () => {
 
 //添加品牌按钮回调函数
 const addTrademark = () => {
-  dialogFormVisible.value = true;
+  //清空收集的数据
+  trademarkParams.id = undefined;
+  trademarkParams.tmName = '';
+  trademarkParams.logoUrl = '';
   //对话框显示
-  console.log("add");
+  dialogFormVisible.value = true;
+  console.log(trademarkParams);
 }
+
 //修改品牌按钮回调函数
-const updateTrademark = () => {
-  dialogFormVisible.value = true;
+//注入了一个参数row
+//row：即为当前行对应的品牌
+const updateTrademark = (row:TradeMark) => {
   //对话框显示
-  console.log("update");
+  dialogFormVisible.value = true;
+  //ES6语法合并对象
+  Object.assign(trademarkParams, row);
+  // trademarkParams.id = row.id;
+  // //展示已有品牌的数据
+  // trademarkParams.tmName = row.tmName;
+  // trademarkParams.logoUrl = row.logoUrl;
+  console.log(trademarkParams);
 }
+
 //对话框底部确认按钮
-const confirm = () => {
-  dialogFormVisible.value = false;
+const confirm = async () => {
+  let result:any = await reqAddOrUpdateTrademark(trademarkParams);
+  //添加品牌成功
+  if (result.code == 200) {
+    //关闭对话框
+    dialogFormVisible.value = false;
+    //弹出提示信息
+    ElMessage({
+      type: 'success',
+      message: trademarkParams.id?'修改品牌成功':'添加品牌成功'
+    });
+    //更新页面信息
+    getHasTrademark(trademarkParams.id?pageNo.value:1);
+    //清空收集数据
+
+  } else {
+    //添加品牌失败
+    ElMessage({
+      type: 'error',
+      message: trademarkParams.id?'修改品牌失败':'添加品牌失败'
+    });
+    //关闭对话框
+    dialogFormVisible.value = false;
+  }
 }
 //对话框底部取消按钮
 const cancel = () => {
@@ -176,6 +212,36 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => 
   //response：即为当前这次上传图片post请求服务器返回的数据
   //手机上传图片的地址，添加一个新的品牌的时候带给服务器
   trademarkParams.logoUrl = response.data;
+}
+
+//品牌名称校验自定义方法
+const validatorTmName = (rule: any, value: any, callback: any) => {
+  //当表单元素触发blur的时候，会触发此方法
+  console.log(rule);
+  //自定义校验规则
+  if(value.length >= 2){
+    //校验通过
+    callback();
+  } else {
+    //校验未通过返回的错误信息
+    callback(new Error('品牌名称大于等于两位'))
+  }
+}
+//自定义logo图片自定义校验规则方法
+const validatorLogoUrl = (rule: any, value: any, callback: any) => {
+  console.log(rule);
+}
+
+//表单校验规则对象
+const rules = {
+  tmName:[
+    //required代表这个字段是必须校验的，表现为表单项前面出现一个五角星
+    //trigger表示触发校验时机[blur：失去焦点时，change：表单发生变化时]
+    { required: true, trigger:'blur', validator:validatorTmName }
+  ],
+  logoUrl:[
+    { required: true, validator:validatorLogoUrl }
+  ]
 }
 </script>
 
