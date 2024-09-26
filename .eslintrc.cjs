@@ -19,6 +19,8 @@ module.exports = {
     'vue/no-reserved-component-names': 'off',
     //忽略某些变量未被使用的错误
     "vue/no-unused-vars": "off",
+    //禁用 vue/valid-attribute-name 规则
+    'vue/valid-attribute-name': 'off',
   },
   parserOptions: {
     ecmaVersion: 'latest'

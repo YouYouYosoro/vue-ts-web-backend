@@ -4,7 +4,7 @@
 <!--      卡片顶部的添加品牌按钮-->
       <el-button icon="Plus" type="primary" size="default" @click="addTrademark">添加品牌</el-button>
 <!--      表格组件用于展示已有品牌数据-->
-      <el-table style="margin: 10px 0px" border :data="trademarkArr">
+      <el-table style="margin: 10px" border :data="trademarkArr">
         <el-table-column label="序号" width="80px" align="center" type="index"></el-table-column>
 <!--        table-column：默认展示数据用div-->
         <el-table-column label="品牌名称">
@@ -20,8 +20,12 @@
         </el-table-column>
         <el-table-column label="操作">
           <template #="{row,$index}">
-            <el-button type="primary" size="default" icon="Edit" @click="$event =>updateTrademark(row)"></el-button>
-            <el-button type="danger" size="default" icon="Delete"></el-button>
+            <el-button type="primary" size="default" icon="Edit" @click="(event: MouseEvent) => updateTrademark(row)"></el-button>
+            <el-popconfirm :title="`您确定要删除 ${row.tmName} 吗?`" width="200px" icon="Delete" @confirm="removeTradeMark(row.id)">
+              <template #reference>
+                <el-button type="danger" size="default" icon="Delete"></el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -47,7 +51,7 @@
 <!--    v-model:属性用户控制对话框的显示与隐藏  -->
 <!--    title:设置对话框左上角标题  -->
     <el-dialog v-model="dialogFormVisible" :title="trademarkParams.id?'修改品牌':'添加品牌'">
-      <el-form style="width: 80%" :model="trademarkParams" :rules="rules">
+      <el-form style="width: 80%" :model="trademarkParams" :rules="rules" ref="formRef">
         <el-form-item label="品牌名称" label-width="90px" label-position="left" prop="tmName">
           <el-input placeholder="请您输入品牌名称" v-model="trademarkParams.tmName"></el-input>
         </el-form-item>
@@ -61,7 +65,7 @@
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="trademarkParams.logoUrl" :src="trademarkParams.logoUrl" class="avatar" />
+            <img v-if="trademarkParams.logoUrl" :src="trademarkParams.logoUrl" alt="Logo" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
@@ -78,10 +82,9 @@
 <script setup lang="ts">
 import { ElMessage, type UploadProps } from 'element-plus'
 
-import { ref, onMounted, reactive } from 'vue'
-import { reqHasTrademark, reqAddOrUpdateTrademark } from '@/api/product/trademark'
+import { ref, onMounted, reactive, nextTick } from 'vue'
+import { reqHasTrademark, reqAddOrUpdateTrademark, reqDeleteTrademark } from '@/api/product/trademark'
 import type { Records, TradeMark, TradeMarkResponseData } from '@/api/product/trademark/type'
-import { requiredNumber } from 'element-plus/es/components/table-v2/src/common.mjs';
 //当前页面
 let pageNo = ref<number>(1);
 //每一页展示多少条数据
@@ -92,6 +95,8 @@ let total = ref<number>(0);
 let trademarkArr = ref<Records>([]);
 //
 let dialogFormVisible = ref<boolean>(false);
+//获取el-form组件实例
+let formRef = ref();
 
 let trademarkParams = reactive<TradeMark>({
   tmName:'',
@@ -135,13 +140,26 @@ const addTrademark = () => {
   trademarkParams.logoUrl = '';
   //对话框显示
   dialogFormVisible.value = true;
-  console.log(trademarkParams);
+
+  // //第一种写法：ts的问号语法
+  // formRef.value?.clearValidate('tmName');
+  // formRef.value?.clearValidate('logoUrl');
+  //第二种写法：nextTick
+  nextTick(()=> {
+    formRef.value.clearValidate('tmName');
+    formRef.value.clearValidate('logoUrl');
+  })
 }
 
 //修改品牌按钮回调函数
 //注入了一个参数row
 //row：即为当前行对应的品牌
 const updateTrademark = (row:TradeMark) => {
+  //清空校验规则的错误的提示信息
+  nextTick(()=> {
+    formRef.value.clearValidate('tmName');
+    formRef.value.clearValidate('logoUrl');
+  })
   //对话框显示
   dialogFormVisible.value = true;
   //ES6语法合并对象
@@ -155,6 +173,9 @@ const updateTrademark = (row:TradeMark) => {
 
 //对话框底部确认按钮
 const confirm = async () => {
+  //在发请求之前，要对整个表单进行校验,这里回触发写好的该表单内的所有校验函数
+  //调用这个方法前先进性校验，如果校验全部通过，再执行后面的语法
+  await formRef.value.validate();
   let result:any = await reqAddOrUpdateTrademark(trademarkParams);
   //添加品牌成功
   if (result.code == 200) {
@@ -208,16 +229,17 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 }
 
 //上传文件成功的钩子
-const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
+const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {
   //response：即为当前这次上传图片post请求服务器返回的数据
   //手机上传图片的地址，添加一个新的品牌的时候带给服务器
   trademarkParams.logoUrl = response.data;
+  //图片上传成功，清除图片校验的结果
+  formRef.value.clearValidate('logoUrl');
 }
 
 //品牌名称校验自定义方法
 const validatorTmName = (rule: any, value: any, callback: any) => {
   //当表单元素触发blur的时候，会触发此方法
-  console.log(rule);
   //自定义校验规则
   if(value.length >= 2){
     //校验通过
@@ -229,7 +251,12 @@ const validatorTmName = (rule: any, value: any, callback: any) => {
 }
 //自定义logo图片自定义校验规则方法
 const validatorLogoUrl = (rule: any, value: any, callback: any) => {
-  console.log(rule);
+  //如果图片上传
+  if (value) {
+    callback();
+  } else {
+    callback(new Error('Logo图片务必上传'))
+  }
 }
 
 //表单校验规则对象
@@ -243,6 +270,26 @@ const rules = {
     { required: true, validator:validatorLogoUrl }
   ]
 }
+
+//气泡确认框确定按钮的回调
+const removeTradeMark = async (id:number) => {
+  let result = await reqDeleteTrademark(id);
+  if (result.code == 200) {
+    ElMessage({
+      type: 'success',
+      message: '品牌删除成功'
+    });
+    //删除成功之后立马再次获取已有品牌数
+    getHasTrademark(trademarkArr.value.length > 1 ? pageNo.value : pageNo.value - 1);
+  } else {
+    ElMessage({
+      type: 'error',
+      message: '删除品牌失败'
+    })
+  }
+}
+
+
 </script>
 
 <style scoped>
@@ -254,7 +301,7 @@ const rules = {
 </style>
 
 <style>
-.avatar-uploader .el-upload {
+.avatar-uploader {
   border: 1px dashed var(--el-border-color);
   border-radius: 6px;
   cursor: pointer;
@@ -263,11 +310,11 @@ const rules = {
   transition: var(--el-transition-duration-fast);
 }
 
-.avatar-uploader .el-upload:hover {
+.avatar-uploader :hover {
   border-color: var(--el-color-primary);
 }
 
-.el-icon.avatar-uploader-icon {
+.avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
   width: 178px;
