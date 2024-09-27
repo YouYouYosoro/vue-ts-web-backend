@@ -6,10 +6,22 @@
           <h1>Hello</h1>
           <h2>欢迎来到项目</h2>
           <el-form-item prop="username">
-            <el-input :prefix-icon="User" v-model="loginForm.username"  class="login_input" placeholder="请输入用户名"></el-input>
+            <el-input
+              :prefix-icon="User"
+              v-model="loginForm.username"
+              class="login_input"
+              placeholder="请输入用户名"
+            ></el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input :prefix-icon="Lock" v-model="loginForm.password" class="login_input" type="password" show-password placeholder="请输入密码"></el-input>
+            <el-input
+              :prefix-icon="Lock"
+              v-model="loginForm.password"
+              class="login_input"
+              type="password"
+              show-password
+              placeholder="请输入密码"
+            ></el-input>
           </el-form-item>
           <el-form-item>
             <el-button :loading="loading" class="login_btn" @click="login">登录</el-button>
@@ -28,46 +40,46 @@ import { ElNotification } from 'element-plus'
 import { getTime } from '@/utils/time'
 //引入用户相关的小仓库
 import useUserStore from '@/store/modules/user'
-let userStore = useUserStore();
+let userStore = useUserStore()
 //获取el-form组件
-let loginForms = ref();
+let loginForms = ref()
 // 获取路由器
-let $router = useRouter();
+let $router = useRouter()
 // 获取路由对象
-let $route = useRoute();
+let $route = useRoute()
 //定义变量控制俺就加载效果
 let loading = ref(false)
 //收集账号与密码的数据
-let loginForm = reactive({username:'admin', password:'111111'})
+let loginForm = reactive({ username: 'admin', password: '111111' })
 //登录按钮回调
-const login = async() => {
+const login = async () => {
   //保证全部表单项校验通过再发请求
-  await loginForms.value.validate();
+  await loginForms.value.validate()
   //加载效果：开始加载
-  loading.value = true;
+  loading.value = true
   //点击登录按钮之后干什么？
   //通知仓库发登录请求
   //请求成功->首页展示数据的地方
   //请求失败->弹出登陆失败的信息
   try {
     //保证登陆成功
-    await userStore.userLogin(loginForm);
+    await userStore.userLogin(loginForm)
     //判断登录的时候,路由路径中是否由query参数,如果有就往query参数跳转,没有则跳转到首页
     //编程导航跳转到展示数据首页
-    let redirect:any = $route.query.redirect;
-    $router.push({path:redirect||'/'});
+    let redirect: any = $route.query.redirect
+    $router.push({ path: redirect || '/' })
     //登录成功提示信息
     ElNotification({
       type: 'success',
       message: '欢迎回来',
       title: `HI,${getTime()}好`
-    });
+    })
     //登陆成功加载效果也消失
-    loading.value = false;
-  }catch(error) {
+    loading.value = false
+  } catch (error) {
     console.log(error)
     //登录失败加载消息效果消失
-    loading.value = false;
+    loading.value = false
     //登陆失败的提示信息
     ElNotification({
       type: 'error',
@@ -76,21 +88,21 @@ const login = async() => {
   }
 }
 //自定义校验规则函数
-const validatorUserName = (rule:any, value:any, callback:any) => {
+const validatorUserName = (rule: any, value: any, callback: any) => {
   //rule:即为数组的校验规则对象
   //value:即为表单元素文本内容
   //函数:如果符合条件callBack方法，注入错误提示信息
   //如果不符合条件callBack方法，注入错误提示信息
-  if(value.length >= 3 && value.length <= 10){
-    callback();
-  }else {
+  if (value.length >= 3 && value.length <= 10) {
+    callback()
+  } else {
     callback(new Error('账号长度介于3位与10位之间'))
   }
 }
-const validatorPassword = (rule:any, value:any, callback:any) => {
-  if(value.length >= 6 && value.length <= 20){
-    callback();
-  }else {
+const validatorPassword = (rule: any, value: any, callback: any) => {
+  if (value.length >= 6 && value.length <= 20) {
+    callback()
+  } else {
     callback(new Error('密码长度介于6位与20位之间'))
   }
 }

@@ -1,5 +1,79 @@
-
-html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, hr, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, figure, figcaption, hgroup, menu, footer, header, nav, section, summary, time, mark, audio, video, img, main, input, textarea, select {
+html,
+body,
+div,
+span,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+address,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+samp,
+small,
+strong,
+sub,
+sup,
+var,
+b,
+i,
+hr,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+figure,
+figcaption,
+hgroup,
+menu,
+footer,
+header,
+nav,
+section,
+summary,
+time,
+mark,
+audio,
+video,
+img,
+main,
+input,
+textarea,
+select {
   border: 0;
   margin: 0;
   padding: 0;
@@ -8,7 +82,21 @@ html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pr
   box-sizing: border-box;
 }
 
-article, aside, canvas, figure, figure img, figcaption, hgroup, footer, header, nav, section, audio, video, main, img {
+article,
+aside,
+canvas,
+figure,
+figure img,
+figcaption,
+hgroup,
+footer,
+header,
+nav,
+section,
+audio,
+video,
+main,
+img {
   display: block;
 }
 
@@ -19,7 +107,7 @@ html {
 }
 
 body {
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   font-weight: normal;
   line-height: 1.6875;
   -webkit-font-smoothing: antialiased;
@@ -52,11 +140,24 @@ h6 {
   font-size: 1.4rem;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: normal;
 }
 
-p, span, strong, label, a, li, ol, th, td {
+p,
+span,
+strong,
+label,
+a,
+li,
+ol,
+th,
+td {
   font-size: 1.4rem;
   line-height: 2.1rem;
 }
@@ -67,7 +168,13 @@ p strong {
   font-weight: 700;
 }
 
-span, label, strong, li, ol, th, td {
+span,
+label,
+strong,
+li,
+ol,
+th,
+td {
   color: inherit;
 }
 
@@ -82,7 +189,10 @@ a {
 a:hover {
   text-decoration: underline;
 }
-a:link, a:visited, a:hover, a:active {
+a:link,
+a:visited,
+a:hover,
+a:active {
   outline: 0;
 }
 a img {
@@ -117,7 +227,8 @@ textarea {
   padding: 10px;
 }
 
-input, select {
+input,
+select {
   vertical-align: middle;
 }
 
@@ -126,32 +237,42 @@ select {
   -webkit-appearance: menulist-button;
 }
 
-input[type="search"]::-ms-clear, input[type="search"]::-webkit-search-cancel-button {
+input[type='search']::-ms-clear,
+input[type='search']::-webkit-search-cancel-button {
   display: none;
 }
-input[type="file"] {
+input[type='file'] {
   background: none;
 }
-input[type="checkbox"], input[type="radio"] {
+input[type='checkbox'],
+input[type='radio'] {
   padding: 0;
   vertical-align: text-bottom;
 }
-input[type="button"], input [type="text"], input [type="password"] {
+input[type='button'],
+input [type='text'],
+input [type='password'] {
   border: 0;
   display: block;
   width: 100%;
 }
 
-button, input[type="button"], input[type="reset"], input[type="submit"] {
+button,
+input[type='button'],
+input[type='reset'],
+input[type='submit'] {
   cursor: pointer;
   font-weight: 700;
   border: 0;
   vertical-align: middle;
   -webkit-appearance: button;
 }
-button:disabled, input[type="button"]:disabled, input[type="reset"]:disabled, input[type="submit"]:disabled {
+button:disabled,
+input[type='button']:disabled,
+input[type='reset']:disabled,
+input[type='submit']:disabled {
   cursor: not-allowed;
-  opacity: .5;
+  opacity: 0.5;
 }
 
 table {
@@ -160,6 +281,7 @@ table {
   max-width: 100%;
   width: 100%;
 }
-table td, table tr {
+table td,
+table tr {
   border: 0;
 }

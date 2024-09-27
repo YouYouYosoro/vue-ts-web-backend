@@ -18,9 +18,9 @@ defineProps({
   //提供使用的图标名字
   name: String,
   //接受父组件传递颜色
-  color:{
-    type:String,
-    default:''
+  color: {
+    type: String,
+    default: ''
   },
   width: {
     type: String,
@@ -33,6 +33,4 @@ defineProps({
 })
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

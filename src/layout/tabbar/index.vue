@@ -1,10 +1,10 @@
 <template>
   <div class="tabbar">
     <div class="tabbar_left">
-      <Breadcrumb/>
+      <Breadcrumb />
     </div>
     <div class="tabbar_right">
-      <Setting/>
+      <Setting />
     </div>
   </div>
 </template>
@@ -16,7 +16,7 @@ import { Expand } from '@element-plus/icons-vue'
 </script>
 <script lang="ts">
 export default {
-  name:"Tabbar"
+  name: 'Tabbar'
 }
 </script>
 
@@ -38,5 +38,4 @@ export default {
     margin-right: 20px;
   }
 }
-
 </style>

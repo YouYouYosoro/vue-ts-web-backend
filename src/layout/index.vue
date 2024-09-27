@@ -1,24 +1,30 @@
 <template>
   <div class="layout_container">
     <!-- 左侧菜单 -->
-    <div class="layout_slider" :class="{fold:LayoutSettingStore.fold?true:false}">
+    <div class="layout_slider" :class="{ fold: LayoutSettingStore.fold ? true : false }">
       <Logo></Logo>
       <!-- 展示菜单 -->
       <!-- 滚动组件 -->
-      <el-scrollbar class="scrollbar ">
+      <el-scrollbar class="scrollbar">
         <!-- 菜单组件 -->
-        <el-menu :collapse="LayoutSettingStore.fold?true:false" :default-active="$route.path" background-color="#303133" text-color="white" active-text-color="red">
+        <el-menu
+          :collapse="LayoutSettingStore.fold ? true : false"
+          :default-active="$route.path"
+          background-color="#303133"
+          text-color="white"
+          active-text-color="red"
+        >
           <!-- 根据路由动态生成菜单 -->
           <Menu :menuList="userStore.menuRoutes"></Menu>
         </el-menu>
       </el-scrollbar>
     </div>
     <!--  顶部导航  -->
-    <div class="layout_tabbar" :class="{fold:LayoutSettingStore.fold?true:false}">
+    <div class="layout_tabbar" :class="{ fold: LayoutSettingStore.fold ? true : false }">
       <Tabbar></Tabbar>
     </div>
     <!--  内容展示区  -->
-    <div class="layout_main" :class="{fold:LayoutSettingStore.fold?true:false}">
+    <div class="layout_main" :class="{ fold: LayoutSettingStore.fold ? true : false }">
       <Main></Main>
     </div>
   </div>
@@ -39,16 +45,16 @@ import Tabbar from '@/layout/tabbar/index.vue'
 //获取用户相关的小仓库
 import useUserStore from '@/store/modules/user'
 import useLayoutSettingStore from '@/store/modules/setting'
-let userStore = useUserStore();
+let userStore = useUserStore()
 //获取layout配置仓库
-let LayoutSettingStore = useLayoutSettingStore();
+let LayoutSettingStore = useLayoutSettingStore()
 
-let $route = useRoute();
+let $route = useRoute()
 </script>
 
 <script lang="ts">
 export default {
-  name:"Layout"
+  name: 'Layout'
 }
 </script>
 
@@ -64,16 +70,16 @@ export default {
     background: $base-menu-background;
     transition: all 0.3s;
 
-    .scrollbar{
+    .scrollbar {
       width: 100%;
       height: calc(100vh - $base-menu-logo-height);
 
-      .el-menu{
+      .el-menu {
         border-right: none;
       }
     }
 
-    &.fold{
+    &.fold {
       width: $base-menu-min-width;
     }
   }
@@ -87,7 +93,7 @@ export default {
     left: $base-menu-width;
     transition: all 0.3s;
 
-    &.fold{
+    &.fold {
       width: calc(100vw - $base-menu-min-width);
       left: $base-menu-min-width;
     }
@@ -103,7 +109,7 @@ export default {
     overflow: auto;
     transition: all 0.3s;
 
-    &.fold{
+    &.fold {
       width: calc(100vw - $base-menu-min-width);
       left: $base-menu-min-width;
     }

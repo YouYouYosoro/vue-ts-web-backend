@@ -13,7 +13,11 @@
     </template>
     <!-- 有子路由但是只有一个 -->
     <template v-if="item.children && item.children.length == 1">
-      <el-menu-item :index="item.children[0].path" v-if="!item.children[0].meta.hidden" @click="goRoute">
+      <el-menu-item
+        :index="item.children[0].path"
+        v-if="!item.children[0].meta.hidden"
+        @click="goRoute"
+      >
         <el-icon>
           <component :is="item.children[0].meta.icon"></component>
         </el-icon>
@@ -43,19 +47,16 @@ import { useRouter } from 'vue-router'
 
 defineProps(['menuList'])
 //获取路由器对象
-let $router = useRouter();
+let $router = useRouter()
 //点击菜单的回调
-const goRoute = (vc:any) => {
+const goRoute = (vc: any) => {
   $router.push(vc.index)
 }
 </script>
 <script lang="ts">
 export default {
-  name:'Menu',
+  name: 'Menu'
 }
 </script>
 
-
-<style  lang="scss">
-
-</style>
+<style lang="scss"></style>

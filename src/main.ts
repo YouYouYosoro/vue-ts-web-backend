@@ -22,9 +22,11 @@ import router from './router'
 //获取应用实例对象
 const app = createApp(App)
 //安装仓库
+// @ts-ignore
 app.use(pinia)
 
 //安装element-plus插件
+// @ts-ignore
 app.use(ElementPlus, {
   locale: zhCn
 })
@@ -33,10 +35,11 @@ app.use(ElementPlus, {
 app.use(globalComponent)
 
 //注册模板路由
-app.use(router);
+// @ts-ignore
+app.use(router)
 
 //引入路由鉴权文件
-import './permissions';
+import './permissions'
 
 //将应用挂载到挂载点上
 app.mount('#app')

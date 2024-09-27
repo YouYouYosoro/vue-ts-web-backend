@@ -21,6 +21,7 @@ module.exports = {
     "vue/no-unused-vars": "off",
     //禁用 vue/valid-attribute-name 规则
     'vue/valid-attribute-name': 'off',
+    'vue/prefer-import-from-vue': 'off', // 禁用 vue/prefer-import-from-vue 规则
   },
   parserOptions: {
     ecmaVersion: 'latest'
