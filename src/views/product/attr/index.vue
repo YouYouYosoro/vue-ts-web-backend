@@ -3,35 +3,40 @@
     <!--    三级分类全局组件-->
     <Category />
     <el-card style="margin-top: 10px">
-      <el-button
-        type="primary"
-        size="default"
-        icon="Plus"
-        :disabled="categoryStore.c3Id ? false : true"
-        >添加属性</el-button
-      >
-      <el-table border style="margin-top: 10px" :data="attrArr">
-        <el-table-column label="序号" type="index" align="center" width="80px"></el-table-column>
-        <el-table-column
-          label="属性名称"
-          align="center"
-          width="120px"
-          prop="attrName"
-        ></el-table-column>
-        <el-table-column label="属性值名称">
-          <template #="{ row, $index }">
-            <el-tag style="margin: 5px" v-for="(item, index) in row.attrValueList" :key="item.id">{{
-              item.valueName
-            }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="120px">
-          <template #="{ row, $index }">
-            <el-button type="primary" size="small" icon="Edit"></el-button>
-            <el-button type="danger" size="small" icon="Delete"></el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div>
+        <el-button
+          type="primary"
+          size="default"
+          icon="Plus"
+          :disabled="categoryStore.c3Id ? false : true"
+          >添加属性</el-button
+        >
+        <el-table border style="margin-top: 10px" :data="attrArr">
+          <el-table-column label="序号" type="index" align="center" width="80px"></el-table-column>
+          <el-table-column
+            label="属性名称"
+            align="center"
+            width="120px"
+            prop="attrName"
+          ></el-table-column>
+          <el-table-column label="属性值名称">
+            <template #="{ row, $index }">
+              <el-tag
+                style="margin: 5px"
+                v-for="(item, index) in row.attrValueList"
+                :key="item.id"
+                >{{ item.valueName }}</el-tag
+              >
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" width="120px">
+            <template #="{ row, $index }">
+              <el-button type="primary" size="small" icon="Edit"></el-button>
+              <el-button type="danger" size="small" icon="Delete"></el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </el-card>
   </div>
 </template>
