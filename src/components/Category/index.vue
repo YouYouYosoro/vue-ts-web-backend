@@ -12,7 +12,12 @@
           <!--    :value="c1.id"-->
           <!--  ></el-option>-->
           <!--</el-select>-->
-          <el-select v-model="categoryStore.c1Id" style="width: 200px" @change="handler1">
+          <el-select
+            :disabled="scene != 0"
+            v-model="categoryStore.c1Id"
+            style="width: 200px"
+            @change="handler1"
+          >
             <!--value:即为select下拉菜单收集的数据, 绑定到上面的c1Id中-->
             <el-option
               v-for="(c1, index) in categoryStore.c1Arr"
@@ -23,7 +28,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="二级分类">
-          <el-select v-model="categoryStore.c2Id" style="width: 200px" @change="handler2">
+          <el-select
+            :disabled="scene != 0"
+            v-model="categoryStore.c2Id"
+            style="width: 200px"
+            @change="handler2"
+          >
             <el-option
               v-for="(c2, index) in categoryStore.c2Arr"
               :key="c2.id"
@@ -34,7 +44,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="三级分类">
-          <el-select v-model="categoryStore.c3Id" style="width: 200px">
+          <el-select
+            :disabled="scene == 0 ? false : true"
+            v-model="categoryStore.c3Id"
+            style="width: 200px"
+          >
             <el-option
               v-for="(c3, index) in categoryStore.c3Arr"
               :key="c3.id"
@@ -98,5 +112,8 @@ const handler2 = () => {
   categoryStore.c3Id = ''
   categoryStore.getC3()
 }
+
+//接收父组件传递过来的scene
+defineProps(['scene'])
 </script>
 <style lang="scss" scoped></style>
