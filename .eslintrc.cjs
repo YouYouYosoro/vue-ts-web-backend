@@ -12,6 +12,8 @@ module.exports = {
   rules: {
     'no-var': 'off',
     //全局配置忽略prefer-const报错
+    "no-redeclare": "off",
+    "no-import-assign": "off",
     'prefer-const': 'off',
     //全局忽略template标签的报错
     'vue/multi-word-component-names': 'off',
