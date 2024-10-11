@@ -27,7 +27,13 @@
           ></el-table-column>
           <el-table-column label="SPU操作" width="300px">
             <template #="{ row, $index }">
-              <el-button type="primary" size="small" icon="Plus" title="添加SPU"></el-button>
+              <el-button
+                @click="addSku(row)"
+                type="primary"
+                size="small"
+                icon="Plus"
+                title="添加SKU"
+              ></el-button>
               <el-button
                 type="warning"
                 size="small"
@@ -35,7 +41,7 @@
                 @click="updateSpu(row)"
                 title="编辑SPU"
               ></el-button>
-              <el-button type="info" size="small" icon="View" title="查看SPU列表"></el-button>
+              <el-button type="info" size="small" icon="View" title="查看SKU列表"></el-button>
               <el-button type="danger" size="small" icon="Delete" title="删除SPU"></el-button>
             </template>
           </el-table-column>
@@ -54,8 +60,8 @@
       </div>
       <!--添加SPU组件-->
       <SpuForm ref="spu" v-show="scene == 1" @changeScene="changeScene"></SpuForm>
-      <!--添加SPU组件-->
-      <SkuForm v-show="scene == 2"></SkuForm>
+      <!--添加SKU组件-->
+      <SkuForm ref="sku" v-show="scene == 2" @changeScene="changeScene"></SkuForm>
     </el-card>
   </div>
 </template>
@@ -85,6 +91,8 @@ let total = ref<number>(0)
 let records = ref<Records>([])
 //获取子组件实例SpuForm
 let spu = ref<any>()
+//获取子组件实例SkuForm
+let sku = ref<any>()
 
 //监听三级分类Id的变化
 watch(
@@ -97,11 +105,12 @@ watch(
 )
 
 //此方法执行：可以获取一个三级分类下全部的已有的SPU
-const getHasSpu = async () => {
-  let result: HasSpuResponseData = await reqHasSpu(pageNo.value, pageSize.value, categoryStore.c3Id)
-  if (result.code == 200) {
-    records.value = result.data.records
-    total.value = result.data.total
+const getHasSpu = async (pager = 1) => {
+  pageNo.value = pager
+  let res: HasSpuResponseData = await reqHasSpu(pageNo.value, pageSize.value, categoryStore.c3Id)
+  if (res.code === 200) {
+    records.value = res.data.records
+    total.value = res.data.total
   }
 }
 
@@ -112,26 +121,37 @@ const changeSize = () => {
 
 const addSpu = () => {
   scene.value = 1
+  //调用子组件暴露出来的方法初始化数组
+  spu.value.initAddSpu(categoryStore.c3Id)
 }
 
 //子组件SpuForm绑定自定义事件：目的是让子组件通知父组件切换场景为0
-const changeScene = (num: number) => {
+const changeScene = (obj: any) => {
   //子组件SpuForm点击取消变为场景0，切换场景
-  scene.value = num
+  scene.value = obj.flag
+  if (obj.params == 'update') {
+    //更新留在当前页
+    getHasSpu(pageNo.value)
+  } else {
+    //添加留在第一页
+    //再次获取全部已有的SPU
+    getHasSpu()
+  }
 }
+
+//添加SKU按钮的回调
+const addSku = (row: SpuData) => {
+  //切换为场景2
+  scene.value = 2
+  //调用子组件的方法初始化添加SKU模块的数据
+  sku.value.initSkuData(categoryStore.c1Id, categoryStore.c2Id, row)
+}
+
 //修改已有SPU
 const updateSpu = (row: SpuData) => {
   scene.value = 1
   //调用子组件实例方法获取完整的已有的SPU的数据
   spu.value.initHasSpuData(row)
-}
-
-const cancel = () => {
-  scene.value = 0
-}
-
-const save = () => {
-  scene.value = 0
 }
 //路由组件销毁时，把仓库分类相关的数据清空
 onBeforeUnmount(() => {
