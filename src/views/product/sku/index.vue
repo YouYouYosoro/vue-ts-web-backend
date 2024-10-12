@@ -1,4 +1,6 @@
 <template>
+  <!--后续代码重复逻辑非常多,如果是刚追到这里的小伙伴建议听老师的思路讲解,内容直接复制粘贴pass掉
+  思路打开就行,不要在重复的事情上浪费时间,工作中有得是你做这种重复工作的机会-->
   <el-card>
     <el-table border style="margin: 10px 0; width: 100%" :data="skuArr">
       <el-table-column
