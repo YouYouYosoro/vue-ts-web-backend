@@ -69,10 +69,15 @@ import { ref, reactive } from 'vue'
 import type { SkuData } from '@/api/product/spu/type'
 import { ElMessage } from 'element-plus'
 let $emit = defineEmits(['changeScene'])
+//平台属性
 let attrArr = ref<any>([])
+//销售属性
 let saleArr = ref<any>([])
+//照片数据
 let imgArr = ref<any>([])
+//获取table组件实例
 let table = ref<any>()
+//收集SKU的参数
 let skuParams = reactive<SkuData>({
   category3Id: '',
   spuId: '',
@@ -102,6 +107,7 @@ const cancel = () => {
 
 //初始化SKU模块，对父组件外暴露该方法
 const initSkuData = async (c1Id: number | string, c2Id: number | string, spu: any) => {
+  //收父组件传递过来的数据
   skuParams.category3Id = spu.category3Id
   skuParams.spuId = spu.id
   skuParams.tmId = spu.tmId
@@ -117,15 +123,22 @@ const initSkuData = async (c1Id: number | string, c2Id: number | string, spu: an
   imgArr.value = res2.data
 }
 
+//设置默认图片的方法
 const handler = (row: any) => {
+  //点击的时候，先让所有的复选框不勾选
   imgArr.value.forEach((item: any) => {
     table.value.toggleRowSelection(item, false)
   })
+  //复选框选中
   table.value.toggleRowSelection(row, true)
+  //收集图片地址
   skuParams.skuDefaultImg = row.imgUrl
 }
 
+//保存按钮回调
 const save = async () => {
+  //整理参数
+  //平台属性
   skuParams.skuAttrValueList = attrArr.value.reduce((prev: any, next: any) => {
     if (next.attrIdAndValueId) {
       let [attrId, valueId] = next.attrIdAndValueId.split(':')
@@ -136,7 +149,7 @@ const save = async () => {
     }
     return prev
   }, [])
-
+  //销售属性
   skuParams.skuSaleAttrValueList = saleArr.value.reduce((prev: any, next: any) => {
     if (next.saleIdAndValueId) {
       let [saleAttrId, saleAttrValueId] = next.saleIdAndValueId.split(':')
@@ -147,7 +160,7 @@ const save = async () => {
     }
     return prev
   }, [])
-
+  //发送请求
   let res = await reqAddSku(skuParams)
   if (res.code === 200) {
     ElMessage({

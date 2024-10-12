@@ -154,7 +154,6 @@ import {
 } from '@/api/product/spu'
 
 import { computed, nextTick, ref } from 'vue'
-import SpuForm from '@/views/product/spu/components/spuForm.vue'
 import { ElMessage } from 'element-plus'
 
 let $emit = defineEmits(['changeScene'])
