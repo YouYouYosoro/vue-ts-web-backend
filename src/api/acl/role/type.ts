@@ -1,9 +1,11 @@
+//角色管理模块数据ts类型
 export interface ResponseData {
   code: number
   message: string
   ok: boolean
 }
 
+//职位数据类型
 export interface RoleData {
   id?: number
   createTime?: string
@@ -12,8 +14,10 @@ export interface RoleData {
   remark?: null
 }
 
+//全部职位的数据ts类型
 export type Records = RoleData[]
 
+//全部职位数据响应的ts类型
 export interface RoleResponseData extends ResponseData {
   data: {
     records: Records
@@ -30,6 +34,7 @@ export interface RoleResponseData extends ResponseData {
   }
 }
 
+//
 export interface MenuData {
   id: number
   createTime: string
