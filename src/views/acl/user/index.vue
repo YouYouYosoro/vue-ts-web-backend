@@ -2,19 +2,27 @@
   <el-card style="height: 80px">
     <el-form :inline="true" class="form">
       <el-form-item label="用户名:">
-        <el-input placeholder="请你输入搜索用户名"></el-input>
+        <el-input placeholder="请你输入搜索用户名" v-model="keyword"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" size="default"> 搜索 </el-button>
-        <el-button size="default">重置</el-button>
+        <el-button type="primary" size="default" :disabled="!keyword" @click="search">
+          搜索
+        </el-button>
+        <el-button size="default" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>
   <el-card style="margin-top: 10px">
     <el-button type="primary" size="default" icon="Plus" @click="addUser">添加用户</el-button>
-    <el-button type="danger" size="default">批量删除</el-button>
+    <el-button
+      type="danger"
+      size="default"
+      @click="deleteSelectUser"
+      :disabled="!selectIdArr.length"
+      >批量删除</el-button
+    >
     <!-- table展示用户信息 -->
-    <el-table style="margin-top: 10px" border :data="userArr">
+    <el-table @selection-change="selectChange" style="margin-top: 10px" border :data="userArr">
       <el-table-column type="selection" align="center"></el-table-column>
       <el-table-column label="#" align="center" type="index"></el-table-column>
       <el-table-column label="ID" align="center" prop="id"></el-table-column>
@@ -56,7 +64,15 @@
           <el-button type="warning" size="small" icon="Edit" @click="updateUser(row)"
             >编辑</el-button
           >
-          <el-button type="danger" size="small" icon="Delete">删除</el-button>
+          <el-popconfirm
+            :title="`你确定删除${row.username}?`"
+            width="260px"
+            @confirm="deleteUser(row.id)"
+          >
+            <template #reference>
+              <el-button type="danger" size="small" icon="Delete"> 删除 </el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -136,9 +152,25 @@
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, nextTick } from 'vue'
-import { reqUserInfo, reqAddOrUpdateUser } from '@/api/acl/user'
-import type { UserResponseData, Records, User, AllRole } from '@/api/acl/user/type'
+import {
+  reqUserInfo,
+  reqAddOrUpdateUser,
+  reqAllRole,
+  reqSetUserRole,
+  reqRemoveUser,
+  reqSelectUser
+} from '@/api/acl/user'
+import type {
+  UserResponseData,
+  Records,
+  User,
+  AllRole,
+  AllRoleResponseData,
+  SetRoleData
+} from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus'
+import useLayoutSettingStore from '@/store/modules/setting'
+
 //默认页码
 let pageNo = ref<number>(1)
 //一页展示几条数据
@@ -159,6 +191,21 @@ let userParams = reactive<User>({
 //获取form组件实例
 let formRef = ref<any>()
 
+//全选复选框是否全选
+let checkAll = ref<boolean>(false)
+//全部职位
+let allRole = ref<AllRole>([])
+//当前用户职位
+let userRole = ref<AllRole>([])
+//准备一个数组存储批量删除用户的ID
+let selectIdArr = ref<User[]>([])
+
+//定义响应式数据：收集用户输入进来的关键字
+let keyword = ref<string>('')
+
+//获取仓库对象
+let settingStore = useLayoutSettingStore()
+
 //组件挂载完毕
 onMounted(() => {
   console.log('组件已挂载')
@@ -169,7 +216,7 @@ onMounted(() => {
 const getHasUser = async (pager = 1) => {
   //获取当前页码
   pageNo.value = pager
-  let res: UserResponseData = await reqUserInfo(pageNo.value, pageSize.value)
+  let res: UserResponseData = await reqUserInfo(pageNo.value, pageSize.value, keyword.value)
   if (res.code == 200) {
     total.value = res.data.total
     userArr.value = res.data.records
@@ -287,38 +334,109 @@ const rules = {
 }
 
 //分配角色按钮的回调
-const setRole = (row: User) => {
-  //抽屉组件出来
-  drawer1.value = true
+const setRole = async (row: User) => {
   //存储已有的用户信息
   Object.assign(userParams, row)
+  //发请求获取全部的职位信息与用户已有的职位的数据
+  let res: AllRoleResponseData = await reqAllRole(userParams.id as number)
+  if (res.code == 200) {
+    //存储全部的职位
+    allRole.value = res.data.allRolesList
+    //存储当前用户已有的职位
+    userRole.value = res.data.assignRoles
+    //抽屉组件出来
+    drawer1.value = true
+  }
 }
 
-//测试复选框代码
-//全选复选框是否全选
-let checkAll = ref<boolean>(false)
-//职位表
-let allRole = ref<AllRole>([])
-let userRole = ref<AllRole>([])
-
-//设置不确定状态,仅负责样式控制
+//控制顶部全选框，设置不确定状态,仅负责样式控制
 const isIndeterminate = ref<boolean>(false)
 
 //全选复选框的change事件
 const handleCheckAllChange = (val: boolean) => {
+  //val：true（全选）| false（没有全选）
   userRole.value = val ? allRole.value : []
+  //不确定的样式（确定样式）
   isIndeterminate.value = false
 }
 //底部复选框change事件
 const handleCheckedUsersChange = (value: string[]) => {
   //已经勾选的项目长度
   const checkedCount = value.length
+  //如果勾选的选项数与所有的数量相等，则将顶部全部勾选框给勾选上
   checkAll.value = checkedCount === allRole.value.length
+  //不确定的样式
   isIndeterminate.value = checkedCount > 0 && checkedCount < allRole.value.length
 }
 
 //分配职位确定按钮的回调
-const confirmClick = () => {}
+const confirmClick = async () => {
+  //收集参数
+  let data: SetRoleData = {
+    userId: userParams.id as number,
+    roleIdList: userRole.value.map((item) => {
+      return item.id as number
+    })
+  }
+  //发送请求
+  let res: any = await reqSetUserRole(data)
+  //处理响应
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '分配职务成功'
+    })
+    drawer1.value = false
+    //再次发送请求获取列表
+    getHasUser(pageNo.value)
+  }
+}
+
+//删除某哦一个用户
+const deleteUser = async (userId: number) => {
+  let res: any = await reqRemoveUser(userId)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功'
+    })
+    //删除成功再次发送请求,需判断页面删除后位置
+    getHasUser(userArr.value.length > 1 ? pageNo.value : pageNo.value - 1)
+  }
+}
+
+//table复选框选择项变更时回调事件
+//会自动注入勾选的数据
+const selectChange = (value: any) => {
+  selectIdArr.value = value
+}
+
+//根据id批量删除用户
+const deleteSelectUser = async () => {
+  //整理批量删除的参数
+  let idList: any = selectIdArr.value.map((item) => {
+    return item.id
+  })
+  //发送请求
+  let res: any = await reqSelectUser(idList)
+  //处理响应
+  if (res.code === 200) {
+    ElMessage({ type: 'success', message: '删除成功' })
+    //判断删除后返回的页面
+    getHasUser(userArr.value.length > 1 ? pageNo.value : pageNo.value - 1)
+  }
+}
+
+//关键字搜索用户
+const search = () => {
+  getHasUser()
+  keyword.value = ''
+}
+
+//重置页面
+const reset = () => {
+  settingStore.refresh = !settingStore.refresh
+}
 </script>
 
 <style scoped>
