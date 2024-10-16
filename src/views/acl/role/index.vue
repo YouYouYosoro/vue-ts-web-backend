@@ -148,7 +148,7 @@ let form = ref<any>()
 let drawer = ref<boolean>(false)
 //存储所有的职位数组
 let menuArr = ref<MenuList>([])
-//存储选择的职位数组
+//存储选择的职位节点数组
 let selectArr = ref<number[]>([])
 //树结构
 let tree = ref<any>()
@@ -241,7 +241,9 @@ const save = async () => {
 //分配权限按钮回调
 const setPermission = async (row: RoleData) => {
   drawer.value = true
+  //收集当前要分配权限的职位数据
   Object.assign(RoleParams, row)
+  //根据id获取职位数据
   let res: MenuResponseData = await reqAllMenuList(RoleParams.id as number)
   if (res.code === 200) {
     menuArr.value = res.data
@@ -254,6 +256,7 @@ const defaultProps = {
   label: 'name'
 }
 
+//递归遍历职位
 const filterSelectArr = (allData: any, initArr: any) => {
   allData.forEach((item: any) => {
     if (item.select && item.level === 4) {
@@ -266,11 +269,16 @@ const filterSelectArr = (allData: any, initArr: any) => {
   return initArr
 }
 
+//确定分配权限按钮回调
 const handler = async () => {
+  //职位的ID
   const roleId = RoleParams.id as number
+  //选中的节点的ID
   let arr = tree.value.getCheckedKeys()
+  //半选的ID
   let arr1 = tree.value.getHalfCheckedKeys()
   let permissionId = arr.concat(arr1)
+  //发送请求下发权限
   let res: any = await reqSetPermission(roleId, permissionId)
   if (res.code === 200) {
     drawer.value = false
@@ -282,6 +290,7 @@ const handler = async () => {
   }
 }
 
+//删除职位按钮回调
 const removeRole = async (id: number) => {
   let res: any = await reqRemoveRole(id)
   if (res.code === 200) {

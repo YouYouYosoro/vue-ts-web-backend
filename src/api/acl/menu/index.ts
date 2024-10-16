@@ -2,12 +2,14 @@ import request from '@/utils/request'
 import type { MenuParams, PermissionResponseData } from './type'
 
 enum API {
+  //获取全部菜单那与按钮的标识数据
   ALLPERMISSION_URL = '/admin/acl/permission',
   ADDMENU_URL = '/admin/acl/permission/save',
   UPDATE_URL = '/admin/acl/permission/update',
   DELETEMENU_URL = '/admin/acl/permission/remove/'
 }
 
+//获取菜单数据
 export const reqAllPermission = () =>
   request.get<any, PermissionResponseData>(API.ALLPERMISSION_URL)
 

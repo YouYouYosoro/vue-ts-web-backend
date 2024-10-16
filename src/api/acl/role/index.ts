@@ -30,7 +30,7 @@ export const reqAddOrUpdateRole = (data: RoleData) => {
   }
 }
 
-//获取菜单列表请求方法
+//获取权限列表请求方法
 export const reqAllMenuList = (roleId: number) =>
   request.get<any, MenuResponseData>(API.ALLPERMISSION_URL + roleId)
 

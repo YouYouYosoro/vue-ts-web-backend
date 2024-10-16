@@ -1,173 +1,142 @@
 <template>
-  <el-container class="chat-container">
-    <!-- Sidebar -->
-    <el-aside width="250px" class="sidebar">
-      <h1 class="logo">deepseek</h1>
-      <el-menu default-active="1" class="sidebar-menu">
-        <el-menu-item index="1">
-          <el-button type="primary" class="full-width"> 通用对话 V2.5 </el-button>
-        </el-menu-item>
-        <el-menu-item index="1">
-          <el-button type="primary" class="full-width"> 代码助手 V2.5 </el-button>
-        </el-menu-item>
-      </el-menu>
-    </el-aside>
-
-    <!-- Main chat area -->
-    <el-container>
-      <el-header class="chat-header">
-        <h2>通用对话 V2.5</h2>
-        <el-button type="text"> 点击查看历史对话 </el-button>
-      </el-header>
-      <el-main class="chat-main">
-        <div class="chat-messages">
-          <div
-            v-for="message in messages"
-            :key="message.id"
-            :class="['message', message.isUser ? 'user-message' : 'ai-message']"
-          >
-            <div class="message-content">
-              <div v-if="!message.isUser" class="ai-icon"></div>
-              <div class="message-text">
-                <p v-for="(line, index) in message.text.split('\n')" :key="index">{{ line }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </el-main>
-      <el-footer class="chat-footer">
-        <el-input
-          v-model="input"
-          placeholder="请输入问题..."
-          :suffix-icon="Send"
-          @keyup.enter="handleSend"
+  <el-table :data="PermissionArr" style="width: 100%; margin-bottom: 20px" row-key="id" border>
+    <el-table-column prop="name" label="名称"></el-table-column>
+    <el-table-column prop="code" label="权限值"></el-table-column>
+    <el-table-column prop="updateTime" label="修改时间"></el-table-column>
+    <el-table-column label="操作" width="280px">
+      <!--row:即为已有的菜单对象-->
+      <template #="{ row, $index }">
+        <el-button
+          @click="addPermission(row)"
+          type="primary"
+          size="small"
+          icon="Plus"
+          :disabled="row.level == 4"
+          >{{ row.level == 3 ? '添加功能' : '添加菜单' }}</el-button
         >
-          <template #append>
-            <el-button @click="handleSend">发送</el-button>
+        <el-button
+          @click="updatePermission(row)"
+          type="warning"
+          size="small"
+          icon="Edit"
+          :disabled="row.level == 1"
+          >编辑</el-button
+        >
+        <el-popconfirm
+          :title="`你确定要删除${row.name}?`"
+          width="260px"
+          @confirm="removeMenu(row.id)"
+        >
+          <template #reference>
+            <el-button type="danger" size="small" icon="Delete" :disabled="row.level === 1">
+              删除
+            </el-button>
           </template>
-        </el-input>
-      </el-footer>
-    </el-container>
-  </el-container>
+        </el-popconfirm>
+      </template>
+    </el-table-column>
+  </el-table>
+  <el-dialog v-model="dialogVisible" :title="menuData.id ? '更新菜单' : '添加菜单'">
+    <el-form>
+      <el-form-item label="名称">
+        <el-input placeholder="请你输入菜单的名称" v-model="menuData.name"></el-input>
+      </el-form-item>
+      <el-form-item label="权限">
+        <el-input placeholder="请你输入权限数值" v-model="menuData.code"></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="save">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, reactive } from 'vue'
+//引入获取菜单API
+import { reqAllPermission, reqAddOrUpdateMenu, reqRemoveMenu } from '@/api/acl/menu'
+//引入ts类型
+import type {
+  PermissionResponseData,
+  PermissionList,
+  Permission,
+  MenuParams
+} from '@/api/acl/menu/type'
+import { ElMessage } from 'element-plus'
 
-const messages = ref([
-  { id: 1, text: '你好！很高兴见到你。有什么我可以帮忙的吗？', isUser: false },
-  { id: 2, text: '今天的深圳天气', isUser: true },
-  {
-    id: 3,
-    text: '深圳今天的天气情况如下:\n\n• 温度：预计最高气温约为28°C，最低气温约为22°C。\n\n• 天气状况：多云，可能会有局部阵雨。\n\n• 风力：风速约为3-4级，风向为东南风。\n\n• 空气质量：空气质量指数（AQI）为良好至轻度污染之间，建议敏感人群注意防护。\n\n建议外出时携带雨具，并根据天气变化适当增减衣物。希望这些信息对你有帮助！',
-    isUser: false
+//存储菜单的数据
+let PermissionArr = ref<PermissionList>([])
+//控制对话框显示隐藏
+let dialogVisible = ref<boolean>(false)
+//收集的添加菜单数据
+let menuData = reactive<MenuParams>({
+  code: '',
+  level: 0,
+  name: '',
+  pid: 0
+})
+//组件封装完毕
+onMounted(() => {
+  getHasPermission()
+})
+
+//获取菜单数据的方法
+const getHasPermission = async () => {
+  let res: PermissionResponseData = await reqAllPermission()
+  if (res.code == 200) {
+    //存储数据
+    PermissionArr.value = res.data
   }
-])
+}
 
-const input = ref('')
+//添加菜单按钮的回调
+const addPermission = (row: Permission) => {
+  //初始化数据
+  Object.assign(menuData, {
+    id: 0,
+    code: '',
+    level: 0,
+    name: '',
+    pid: 0
+  })
+  dialogVisible.value = true
+  menuData.level = row.level + 1
+  menuData.pid = row.id as number
+}
 
-const handleSend = () => {
-  if (input.value.trim()) {
-    messages.value.push({ id: messages.value.length + 1, text: input.value, isUser: true })
-    input.value = ''
-    // Here you would typically call an API to get the AI response
-    setTimeout(() => {
-      messages.value.push({
-        id: messages.value.length + 1,
-        text: '这是一个AI回复的示例。',
-        isUser: false
-      })
-    }, 1000)
+//编辑菜单按钮回调
+const updatePermission = (row: Permission) => {
+  dialogVisible.value = true
+  Object.assign(menuData, row)
+}
+
+//确定保存按钮的回调
+const save = async () => {
+  dialogVisible.value = false
+  let res: any = await reqAddOrUpdateMenu(menuData)
+  if (res.code === 200) {
+    dialogVisible.value = false
+    ElMessage({
+      type: 'success',
+      message: menuData.id ? '更新成功' : '添加成功'
+    })
+    getHasPermission()
+  }
+}
+//删除按钮的回调
+const removeMenu = async (id: number) => {
+  let res = await reqRemoveMenu(id)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功'
+    })
+    getHasPermission()
   }
 }
 </script>
 
-<style scoped>
-.chat-container {
-  height: 100vh;
-  background-color: #f0f2f5;
-}
-
-.sidebar {
-  background-color: #fff;
-  border-right: 1px solid #e0e0e0;
-  padding: 20px;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-  color: #409eff;
-  margin-bottom: 20px;
-}
-
-.sidebar-menu {
-  border-right: none;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.chat-header {
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.chat-main {
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.chat-messages {
-  display: flex;
-  flex-direction: column;
-}
-
-.message {
-  max-width: 70%;
-  margin-bottom: 20px;
-}
-
-.user-message {
-  align-self: flex-end;
-}
-
-.ai-message {
-  align-self: flex-start;
-}
-
-.message-content {
-  display: flex;
-  align-items: flex-start;
-}
-
-.ai-icon {
-  background-color: #409eff;
-  color: white;
-  padding: 8px;
-  border-radius: 4px;
-  margin-right: 10px;
-}
-
-.message-text {
-  background-color: #fff;
-  border-radius: 4px;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-message .message-text {
-  background-color: #e6f1ff;
-}
-
-.chat-footer {
-  background-color: #fff;
-  border-top: 1px solid #e0e0e0;
-  padding: 10px 20px;
-}
-</style>
+<style lang="scss" scoped></style>

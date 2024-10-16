@@ -34,7 +34,7 @@ export interface RoleResponseData extends ResponseData {
   }
 }
 
-//
+//权限数据的ts类型
 export interface MenuData {
   id: number
   createTime: string
@@ -52,6 +52,7 @@ export interface MenuData {
 
 export type MenuList = MenuData[]
 
+//权限接口与按钮返回的ts数据类型
 export interface MenuResponseData extends ResponseData {
   data: MenuList
 }
