@@ -64,7 +64,6 @@ export default {
   height: 100vh;
 
   .layout_slider {
-    color: white;
     width: $base-menu-width;
     height: 100vh;
     background: $base-menu-background;
@@ -88,7 +87,6 @@ export default {
     position: fixed;
     width: calc(100% - $base-menu-width);
     height: $base-tabbar-height;
-    background: white;
     top: 0px;
     left: $base-menu-width;
     transition: all 0.3s;

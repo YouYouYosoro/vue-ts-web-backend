@@ -12,7 +12,7 @@
         <el-table-column label="品牌名称">
           <!--          自定义插槽：# 是v-slot的简写-->
           <template #="{ row, $index }">
-            <pre style="color: black">{{ row.tmName }}</pre>
+            <pre>{{ row.tmName }}</pre>
           </template>
         </el-table-column>
         <el-table-column label="品牌logo">

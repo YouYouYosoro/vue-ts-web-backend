@@ -18,6 +18,8 @@ import App from './App.vue'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 //引入路由
 import router from './router'
+//暗黑模式
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 //获取应用实例对象
 const app = createApp(App)
