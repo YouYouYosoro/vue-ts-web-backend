@@ -93,10 +93,6 @@ onMounted(() => {
       color: white;
       font-size: 20px;
     }
-
-    img {
-      margin-top: 10px;
-    }
   }
 
   .charts {
