@@ -54,6 +54,10 @@ export const constantRoute = [
       icon: 'DataLine'
     }
   },
+]
+
+//异步路由
+export const asyncRoute = [
   {
     path: '/acl',
     component: () => import('@/layout/index.vue'),
@@ -150,6 +154,10 @@ export const constantRoute = [
       }
     ]
   },
+]
+
+//任意路由
+export const anyRoute = [
   {
     //不知名的路由地址重定向到404
     path: '/:pathMatch(.*)*',
