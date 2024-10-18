@@ -76,6 +76,7 @@ const login = async () => {
     })
     //登陆成功加载效果也消失
     loading.value = false
+    window.location.reload()
   } catch (error) {
     console.log(error)
     //登录失败加载消息效果消失

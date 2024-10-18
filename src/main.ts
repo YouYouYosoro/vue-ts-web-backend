@@ -43,5 +43,9 @@ app.use(router)
 //引入路由鉴权文件
 import './permissions'
 
+//引入自定义指令文件
+import { isHasButton } from '@/directive/has'
+isHasButton(app)
+
 //将应用挂载到挂载点上
 app.mount('#app')

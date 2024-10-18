@@ -105,6 +105,12 @@ import {
   reqDeleteTrademark
 } from '@/api/product/trademark'
 import type { Records, TradeMark, TradeMarkResponseData } from '@/api/product/trademark/type'
+
+// //按钮权限的实现
+// import useUserStore from '@/store/modules/user'
+// //获取用户相关的仓库
+// let userStore = useUserStore()
+
 //当前页面
 let pageNo = ref<number>(1)
 //每一页展示多少条数据
